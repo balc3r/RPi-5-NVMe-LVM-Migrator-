@@ -43,6 +43,7 @@ VG_NAME="pi_vg"
 LV_ROOT_SIZE="12G"    # Size for the OS
 LV_VARLOG_SIZE="4G"   # Size for /var/log
 LV_DATA_SIZE="20G"    # Size for /data partition (Set to "100%FREE" to use full disk)
+```
 
 🚀 Usage Guide
 1. Prepare the Script
