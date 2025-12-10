@@ -1,71 +1,43 @@
-# RPi-5-NVMe-LVM-Migrator-
-Automated script to migrate Raspberry Pi OS (Bookworm) from SD Card to NVMe SSD with LVM support.
+# 🚀 RPi 5 NVMe LVM Migrator
 
+**Automated script to migrate Raspberry Pi OS (Bookworm) from an SD Card to an NVMe SSD with full LVM support.**
 
-This script automates the complex process of moving a running Raspberry Pi 5 system to an NVMe drive while setting up LVM (Logical Volume Manager). It handles partitioning, data migration, bootloader configuration, and—most importantly—fixes the initramfs boot issues common with RPi 5 and LVM.
+## 📖 Overview
 
-🌟 Features
-Full Automation: Wipes NVMe, partitions it, creates LVM, and copies the system.
+Running a Raspberry Pi 5 from an NVMe SSD provides a massive performance boost over standard SD cards. However, setting up **LVM (Logical Volume Manager)** on the boot drive can be tricky because the Raspberry Pi bootloader does not natively understand LVM volumes.
 
-LVM Support: Sets up Logical Volume Manager for flexibility.
+This script automates the entire process. It takes a vanilla Raspberry Pi OS installation running on an SD card, clones it to your NVMe drive, sets up LVM structure, and applies the necessary boot configuration fixes (`initramfs` & `config.txt`) to ensure the system boots correctly.
 
-Custom Partitioning: Creates separate volumes for / (Root), /var/log, and /data to keep your data organized and safe.
+## ✨ Features
 
-Bootloader Config: Automatically updates EEPROM (boot_order and pcie_probe).
+* **Automated Partitioning:** Wipes the NVMe drive and creates a standard Boot partition (FAT32) and an LVM Physical Volume.
+* **LVM Setup:** Creates a Volume Group (`pi_vg`) and separate Logical Volumes for:
+    * `root` (System)
+    * `var_log` (Logs - prevents log spam from filling up root)
+    * `data` (User data)
+* **Smart Cloning:** Uses `rsync` to copy your running system to the new drive.
+* **Bootloader Configuration:** Automatically updates the RPi EEPROM to enable PCIe Gen 3 and set the boot order to NVMe.
+* **The "Boot Fix":** Automatically generates the `initramfs` image and modifies `config.txt` to force the kernel to load LVM drivers before mounting the root filesystem.
 
-Initramfs Fix: Handles the specific Raspberry Pi 5 requirement to manually copy initramfs to the FAT32 boot partition to allow booting from LVM.
+## 🛠 Prerequisites
 
-Update Safe: Standard apt upgrade works fine (kernel updates trigger initramfs regeneration, though manual copy to boot partition might be needed for major kernel version jumps).
+1.  **Raspberry Pi 5**.
+2.  **NVMe SSD** installed (via HAT or PCIe base).
+3.  **SD Card** with a working, fresh installation of Raspberry Pi OS (Bookworm).
+4.  **Internet Connection** (to install dependencies like `lvm2` and `rsync`).
 
-🛠 Prerequisites
-Raspberry Pi 5.
+## ⚙️ Configuration
 
-NVMe SSD connected via a HAT or PCIe base.
+Before running the script, open it and adjust the variables at the top to match your needs:
 
-SD Card with a working installation of Raspberry Pi OS (Bookworm).
+```bash
+# Target Drive (Default is usually correct)
+TARGET_DISK="/dev/nvme0n1"
 
-Internet connection (to install lvm2, rsync, parted).
-
-⚙️ Configuration
-Open the script and adjust the variables at the top to fit your needs:
-
-Bash
-
-TARGET_DISK="/dev/nvme0n1" # Your NVMe device
-VG_NAME="pi_vg"            # Volume Group Name
+# Volume Group Name
+VG_NAME="pi_vg"
 
 # Logical Volume Sizes
-LV_ROOT_SIZE="12G"         # Size for system root
-LV_VARLOG_SIZE="4G"        # Size for logs
-LV_DATA_SIZE="20G"         # Size for your data (or use "100%FREE")
-🚀 Usage
-Boot your Raspberry Pi from the SD Card.
-
-Download or create the script:
-
-Bash
-
-nano migrate.sh
-# Paste the script content here
-Make it executable:
-
-Bash
-
-chmod +x migrate.sh
-Run as root:
-
-Bash
-
-sudo ./migrate.sh
-Wait for the "SUCCESS" message.
-
-Shutdown (sudo poweroff).
-
-REMOVE the SD Card. (Crucial step! Do not boot with both attached initially).
-
-Power on and enjoy your fast NVMe system!
-
-⚠️ Disclaimer
-This script wipes the target disk (/dev/nvme0n1). Make sure you don't have important data on the SSD.
-
-Use at your own risk. Always backup your SD card before performing major system changes.
+LV_ROOT_SIZE="30G"    # Size for the OS
+LV_VARLOG_SIZE="5G"   # Size for /var/log
+LV_DATA_SIZE="20G"    # Size for /data partition
