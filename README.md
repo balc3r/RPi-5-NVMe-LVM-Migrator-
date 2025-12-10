@@ -1,6 +1,6 @@
 # 🚀 RPi 5 NVMe LVM Migrator
 
-**Automated script to migrate Raspberry Pi OS (Bookworm) from an SD Card to an NVMe SSD with full Logical Volume Manager (LVM) support.**
+**Automated script to migrate Raspberry Pi OS (Bookworm/Trixie) from an SD Card to an NVMe SSD with full Logical Volume Manager (LVM) support.**
 
 ## 📖 Overview
 
@@ -25,7 +25,7 @@ This script solves that problem automatically. It:
 
 1.  **Raspberry Pi 5**.
 2.  **NVMe SSD** installed (via HAT or PCIe base).
-3.  **SD Card** with a working installation of Raspberry Pi OS (Bookworm).
+3.  **SD Card** with a working installation of Raspberry Pi OS (Bookworm/Trixie).
 4.  **Internet Connection** (to install `lvm2`, `rsync`, `parted`).
 
 ## ⚙️ Configuration
