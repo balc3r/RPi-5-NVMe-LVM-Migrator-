@@ -45,25 +45,23 @@ LV_VARLOG_SIZE="4G"   # Size for /var/log
 LV_DATA_SIZE="20G"    # Size for /data partition (Set to "100%FREE" to use full disk)
 ```
 
-🚀 Usage Guide
+# 🚀 Usage Guide
 1. Prepare the Script
 Boot your Raspberry Pi from the SD Card. Create the script file:
-
-Bash
-
+```
 nano migrate_nvme.sh
+```
 Paste the script content into the file, save (Ctrl+O), and exit (Ctrl+X).
 
 2. Make Executable
-Bash
-
+```
 chmod +x migrate_nvme.sh
+```
 3. Run the Migration
 Run the script with root privileges. ⚠️ WARNING: This will ERASE ALL DATA on the target NVMe drive.
-
-Bash
-
+```
 sudo ./migrate_nvme.sh
+```
 4. Finalize
 Once the script finishes and prints the SUCCESS message:
 
@@ -75,69 +73,23 @@ REMOVE the SD Card. (Critical Step! Do not boot with both drives attached initia
 
 Plug the power back in.
 
-📊 Post-Installation: Managing Storage
+# 📊 Post-Installation: Managing Storage
 One of the biggest advantages of using this script is LVM. Unlike standard partitions, you can resize your volumes later without reformatting.
 
 1. Check Available Space
 To see how much "unallocated" space is left in your Volume Group (e.g., if you set Data to 20G and have a 512G drive):
-
-Bash
-
-sudo vgs
-Look at the VFree column. This is your pool of free space.
-
-To check current usage of your mounted partitions:
-
-Bash
-
+```
 df -h
+```
+
 2. Extending Volumes (Online)
 You can increase the size of a partition (even the Root / partition) while the system is running. No reboot required.
 
 Example: Add 10GB to the Root partition:
-
-Bash
-
 # The -r flag automatically resizes the filesystem
 sudo lvextend -r -L +10G /dev/pi_vg/root
-Example: Use ALL remaining free space for Root:
 
-Bash
-
-sudo lvextend -r -l +100%FREE /dev/pi_vg/root
-3. Shrinking Volumes (Offline)
-If you allocated too much space to /data and want to reclaim it, you must unmount it first.
-
-Example: Shrink /data to 50GB:
-
-Bash
-
-# 1. Unmount the volume
-sudo umount /data
-
-# 2. Check filesystem integrity (Required!)
-sudo e2fsck -f /dev/pi_vg/data
-
-# 3. Reduce size (The --resizefs flag handles filesystem resizing safely)
-sudo lvreduce --resizefs -L 50G /dev/pi_vg/data
-
-# 4. Mount it back
-sudo mount -a
-4. Creating New Volumes
-Have extra space? You can create a new partition anytime (e.g., for Docker containers):
-
-Bash
-
-# Create a 5GB volume named "docker_data"
-sudo lvcreate -L 5G -n docker_data pi_vg
-
-# Format it
-sudo mkfs.ext4 /dev/pi_vg/docker_data
-
-# Mount it somewhere
-sudo mkdir /var/lib/docker_custom
-sudo mount /dev/pi_vg/docker_data /var/lib/docker_custom
-🐛 Troubleshooting
+# 🐛 Troubleshooting
 System doesn't boot (Red LED / Green flashes): Ensure you removed the SD card. The bootloader gets confused if it sees two bootable partitions with similar UUIDs.
 
 "Waiting for root device" error: This usually means the initramfs wasn't loaded.
@@ -150,7 +102,7 @@ Check config.txt for the line: initramfs initramfs.gz followkernel.
 
 Ensure initramfs.gz exists in that folder.
 
-⚠️ Disclaimer
+# ⚠️ Disclaimer
 This script performs destructive operations on the target disk (/dev/nvme0n1). The author is not responsible for any data loss. Always backup your data before running system migration scripts.
 
 📜 License
